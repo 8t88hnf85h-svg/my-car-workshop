@@ -23,3 +23,11 @@ jobs:
             npm run build
             echo "Web build completed successfully!"
           fi
+
+      - name: Setup App Store Connect API Key File
+        env:
+          PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.private_keys
+          echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
+          echo "API Key file created successfully!"
