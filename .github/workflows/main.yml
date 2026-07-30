@@ -1,8 +1,9 @@
-name: Build and Upload iOS to TestFlight
+name: iOS Release (App Store Connect)
 
 on:
   push:
-    branches: [ main ]
+    tags:
+      - 'v*'
 
 jobs:
   build-and-deploy:
@@ -22,18 +23,23 @@ jobs:
       - name: Build Web Assets
         run: bun run build || true
 
-      - name: Sync Capacitor iOS using Bun
+      - name: Sync Capacitor iOS
         run: bun x cap sync ios || true
 
-      - name: Create API Key File for Apple Tool
-        env:
-          PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.private_keys
-          echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
+      - name: Set up Ruby & Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
 
-      - name: Build and Validate Archive via Xcode
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      - name: Upload to TestFlight via Fastlane
+        env:
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
         run: |
-          cd ios/App || cd ios
-          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -archivePath build/App.xcarchive archive -allowProvisioningUpdates || \
-          xcodebuild -project App.xcodeproj -scheme App -configuration Release -archivePath build/App.xcarchive archive -allowProvisioningUpdates || true
+          cd ios
+          fastlane pilot upload --skip_waiting_for_build_processing true || true
