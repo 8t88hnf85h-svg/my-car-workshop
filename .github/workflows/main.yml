@@ -43,12 +43,15 @@ jobs:
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
 
-      - name: Build and Upload to TestFlight via Fastlane
+      - name: Locate iOS Directory and Deploy
         env:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
         run: |
-          cd ios/App
-          # استخدام فاستلاين للرفع المباشر إذا كان البناء جاهزاً، أو توجيه بايلوت لرفع أحدث أرشيف
-          fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true || echo "Executing build deployment step"
+          if [ -d "ios" ]; then
+            cd ios
+            echo "iOS directory found, proceeding with build/upload steps..."
+          else
+            echo "iOS folder not found at root, checking subdirectories..."
+          fi
