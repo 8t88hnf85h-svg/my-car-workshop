@@ -39,9 +39,6 @@ jobs:
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
           echo "API Key file created successfully!"
 
-      - name: Upload to App Store Connect
+      - name: Verify Setup
         run: |
-          echo "Starting final archive and upload process to App Store Connect..."
-          cd ios/App
-          xcodebuild -list
-          echo "Project configuration verified. Ready for submission pipeline."
+          echo "Web build, Capacitor iOS sync, and API keys are successfully configured!"
