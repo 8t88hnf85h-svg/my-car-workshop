@@ -16,7 +16,7 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install Dependencies Safely
+      - name: Install Dependencies
         run: bun install --no-save || bun install --force || true
 
       - name: Build Web Assets
@@ -34,23 +34,18 @@ jobs:
       - name: Install Fastlane
         run: gem install fastlane
 
-      - name: Create API Key File for App Store Connect
+      - name: Create API Key File
         env:
           PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
 
-      - name: Upload to TestFlight with Correct Path
+      - name: Upload to TestFlight
         env:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
         run: |
-          if [ -d "ios/App" ]; then
-            cd ios/App
-            fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true || echo "Upload processed"
-          else
-            echo "Directory ios/App not found"
-            exit 1
-          fi
+          cd ios/App
+          fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true
