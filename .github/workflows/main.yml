@@ -11,6 +11,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js (For Web Project)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies and Build Web App
+        run: |
+          if [ -f "package.json" ]; then
+            npm install
+            npm run build
+            echo "Web app built successfully!"
+          else
+            echo "No package.json found, skipping web build."
+          fi
+
       - name: Setup App Store Connect API Key File
         env:
           PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
@@ -18,9 +33,3 @@ jobs:
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
           echo "API Key file created successfully!"
-
-      - name: Verify Key Configuration
-        run: |
-          echo "Key ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}"
-          echo "Issuer ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
-          echo "Authentication setup is ready for building!"
