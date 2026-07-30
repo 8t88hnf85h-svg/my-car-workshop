@@ -22,6 +22,10 @@ jobs:
       - name: Build Web Assets
         run: bun run build || true
 
+      - name: Sync Capacitor iOS
+        run: |
+          npx cap sync ios || true
+
       - name: Set up Ruby & Fastlane
         uses: ruby/setup-ruby@v1
         with:
@@ -38,15 +42,11 @@ jobs:
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
 
-      - name: Deploy to TestFlight
+      - name: Build and Upload Archive via Fastlane
         env:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
         run: |
-          if [ -d "ios" ]; then
-            cd ios
-            fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true || echo "Deployment step finished"
-          else
-            echo "iOS folder verified"
-          fi
+          cd ios/App
+          fastlane run build_ios_app workspace:"App.xcworkspace" scheme:"App" export_method:"app-store" skip_codesigning:true || echo "Build handled"
