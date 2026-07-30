@@ -35,4 +35,4 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
           echo "Building and deploying iOS app..."
-          # هنا يتم ربط الأدوات ورفع التطبيق ببيانات الـ API المعتمدة
+         
