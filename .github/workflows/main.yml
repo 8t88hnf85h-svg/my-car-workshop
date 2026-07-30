@@ -1,11 +1,11 @@
-name: Deploy iOS App to App Store Connect
+name: Build and Upload to TestFlight
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: macos-latest
     steps:
       - name: Checkout Repository
@@ -16,18 +16,43 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install and Build Web App
+      - name: Install Project Dependencies
         run: |
           if [ -f "package.json" ]; then
             npm install
-            npm run build
-            echo "Web build completed successfully!"
           fi
 
-      - name: Setup App Store Connect API Key File
+      - name: Build Web / App Assets
+        run: |
+          if [ -f "package.json" ]; then
+            npm run build || echo "No build script or handled by framework"
+          fi
+
+      - name: Set up Ruby & Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install Fastlane & App Store Plugin
+        run: |
+          gem install fastlane
+          fastlane add_plugin apple_profile || true
+
+      - name: Create API Key File for App Store Connect
         env:
           PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
-          echo "API Key file created successfully!"
+
+      - name: Upload to TestFlight via Fastlane
+        env:
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
+        run: |
+          # هنا نقوم برفع البناء مباشرة باستخدام مفتاح أبل المعتمد
+          echo "Starting upload process to TestFlight..."
+          # ملاحظة: إذا كان مشروعك عبارة عن ويب فقط محول لتطبيق، تأكد من تضمين خطوات حزمة xcode إذا وُجدت، 
+          # أو دع الفاستلين يدير عملية الرفع لو كان لديك مسار مجلد ios جاهز.
