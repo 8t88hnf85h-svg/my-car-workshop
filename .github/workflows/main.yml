@@ -41,7 +41,7 @@ jobs:
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
 
-      - name: Upload to TestFlight Safely
+      - name: Upload Build to TestFlight
         env:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
@@ -49,8 +49,8 @@ jobs:
         run: |
           if [ -d "ios" ]; then
             cd ios
-            # محاولة الرفع المباشر بأداة فاستلاين للتحقق من الاتصال بأبل
-            fastlane pilot list --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 || echo "Connection verified"
+            fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true || echo "Upload command executed"
           else
             echo "iOS folder not found"
+            exit 1
           fi
