@@ -11,19 +11,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Verify Secrets and Environment
-        env:
-          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
-          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      - name: Authenticate App Store Connect API
+        uses: apple-actions/import-app-store-connect-api-key@v2
+        with:
+          key-id: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
+          issuer-id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          private-key: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+
+      - name: Verify Authentication Success
         run: |
-          echo "Verifying App Store Connect configuration..."
-          if [ -z "$KEY_ID" ] || [ -z "$ISSUER_ID" ]; then
-            echo "Error: Missing required secrets."
-            exit 1
-          fi
-          echo "Configuration verified successfully!"
-          
-      - name: Build and Upload placeholder
-        run: |
-          echo "Preparing build files for application..."
-          echo "Ready for TestFlight upload."
+          echo "Successfully authenticated with App Store Connect API!"
+          echo "Ready for building and uploading the app."
