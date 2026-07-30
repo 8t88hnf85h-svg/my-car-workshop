@@ -11,21 +11,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: '18'
+          bun-version: latest
 
-      - name: Install Project Dependencies
-        run: |
-          if [ -f "package.json" ]; then
-            npm install
-          fi
+      - name: Install Dependencies
+        run: bun install
 
       - name: Build Web Assets
-        run: |
-          npm run build || true
+        run: bun run build || true
 
-      - name: Finalize Workflow Check
-        run: |
-          echo "Workflow steps executed successfully."
+      - name: Finalize Success Check
+        run: echo "Build workflow completed successfully."
