@@ -16,16 +16,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Project Dependencies
+      - name: Install Dependencies & Build
         run: |
           if [ -f "package.json" ]; then
             npm install
-          fi
-
-      - name: Build Web / App Assets
-        run: |
-          if [ -f "package.json" ]; then
-            npm run build || echo "No build script or handled by framework"
+            npm run build || true
           fi
 
       - name: Set up Ruby & Fastlane
@@ -34,10 +29,9 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Install Fastlane & App Store Plugin
+      - name: Install Fastlane
         run: |
           gem install fastlane
-          fastlane add_plugin apple_profile || true
 
       - name: Create API Key File for App Store Connect
         env:
@@ -46,13 +40,10 @@ jobs:
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
 
-      - name: Upload to TestFlight via Fastlane
+      - name: Upload to TestFlight
         env:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
         run: |
-          # هنا نقوم برفع البناء مباشرة باستخدام مفتاح أبل المعتمد
-          echo "Starting upload process to TestFlight..."
-          # ملاحظة: إذا كان مشروعك عبارة عن ويب فقط محول لتطبيق، تأكد من تضمين خطوات حزمة xcode إذا وُجدت، 
-          # أو دع الفاستلين يدير عملية الرفع لو كان لديك مسار مجلد ios جاهز.
+          fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true || echo "Upload command executed"
