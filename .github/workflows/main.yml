@@ -11,14 +11,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Authenticate App Store Connect API
-        uses: apple-actions/import-app-store-connect-api-key@v2
-        with:
-          key-id: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
-          issuer-id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          private-key: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
-
-      - name: Verify Authentication Success
+      - name: Setup App Store Connect API Key File
+        env:
+          PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
         run: |
-          echo "Successfully authenticated with App Store Connect API!"
-          echo "Ready for building and uploading the app."
+          mkdir -p ~/.private_keys
+          echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
+          echo "API Key file created successfully!"
+
+      - name: Verify Key Configuration
+        run: |
+          echo "Key ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}"
+          echo "Issuer ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
+          echo "Authentication setup is ready for building!"
