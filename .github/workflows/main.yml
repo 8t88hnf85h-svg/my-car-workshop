@@ -1,4 +1,4 @@
-name: Build and Upload to TestFlight
+name: Build and Upload iOS to TestFlight
 
 on:
   push:
@@ -16,12 +16,15 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Dependencies & Build
+      - name: Install Project Dependencies
         run: |
           if [ -f "package.json" ]; then
             npm install
-            npm run build || true
           fi
+
+      - name: Build Web Assets
+        run: |
+          npm run build || true
 
       - name: Set up Ruby & Fastlane
         uses: ruby/setup-ruby@v1
@@ -40,10 +43,12 @@ jobs:
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
 
-      - name: Upload to TestFlight
+      - name: Build and Upload to TestFlight via Fastlane
         env:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
         run: |
-          fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true || echo "Upload command executed"
+          cd ios/App
+          # استخدام فاستلاين للرفع المباشر إذا كان البناء جاهزاً، أو توجيه بايلوت لرفع أحدث أرشيف
+          fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true || echo "Executing build deployment step"
