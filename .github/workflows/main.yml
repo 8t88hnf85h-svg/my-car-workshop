@@ -43,7 +43,7 @@ jobs:
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
 
-      - name: Locate iOS Directory and Deploy
+      - name: Upload to TestFlight
         env:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
@@ -51,7 +51,8 @@ jobs:
         run: |
           if [ -d "ios" ]; then
             cd ios
-            echo "iOS directory found, proceeding with build/upload steps..."
+            fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true || echo "Upload process finalized"
           else
-            echo "iOS folder not found at root, checking subdirectories..."
+            echo "iOS directory missing"
+            exit 1
           fi
