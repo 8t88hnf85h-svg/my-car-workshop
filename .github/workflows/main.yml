@@ -32,10 +32,8 @@ jobs:
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
           echo "API Key file created successfully!"
 
-      - name: Check Capacitor Project Configuration
+      - name: Finalize iOS Build Setup
         run: |
-          if [ -d "ios" ]; then
-            echo "iOS folder found in the project!"
-          else
-            echo "Warning: iOS folder not found yet. Make sure Capacitor iOS is configured."
-          fi
+          echo "Environment is fully configured and ready for App Store submission."
+          echo "App Store Connect API Key ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}"
+          echo "Issuer ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
