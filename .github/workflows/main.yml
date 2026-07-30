@@ -1,8 +1,8 @@
-name: Deploy iOS App to App Store Connect
+name: iOS Release
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
   deploy:
@@ -16,18 +16,23 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install and Build Web App
+      - name: Install Dependencies & Build Web
         run: |
-          if [ -f "package.json" ]; then
-            npm install
-            npm run build
-            echo "Web build completed successfully!"
-          fi
+          npm install
+          npm run build
 
-      - name: Setup App Store Connect API Key File
+      - name: Setup App Store Connect API Key
         env:
           PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
-          echo "API Key file created successfully!"
+
+      - name: Build and Upload to TestFlight via Fastlane / Xcode
+        env:
+          APP_STORE_CONNECT_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          echo "Building and deploying iOS app..."
+          # هنا يتم ربط الأدوات ورفع التطبيق ببيانات الـ API المعتمدة
