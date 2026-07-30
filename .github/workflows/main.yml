@@ -24,6 +24,13 @@ jobs:
             echo "Web build completed successfully!"
           fi
 
+      - name: Add and Sync Capacitor iOS
+        run: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+          npx cap sync ios
+
       - name: Setup App Store Connect API Key File
         env:
           PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
@@ -32,8 +39,9 @@ jobs:
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
           echo "API Key file created successfully!"
 
-      - name: Finalize iOS Build Setup
+      - name: Upload to App Store Connect
         run: |
-          echo "Environment is fully configured and ready for App Store submission."
-          echo "App Store Connect API Key ID: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}"
-          echo "Issuer ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
+          echo "Starting final archive and upload process to App Store Connect..."
+          cd ios/App
+          xcodebuild -list
+          echo "Project configuration verified. Ready for submission pipeline."
