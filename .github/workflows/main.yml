@@ -22,8 +22,12 @@ jobs:
       - name: Build Web Assets
         run: bun run build || true
 
-      - name: Sync Capacitor iOS
-        run: npx cap sync ios || true
+      - name: Initialize Capacitor iOS if Missing
+        run: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+          npx cap sync ios
 
       - name: Set up Ruby & Fastlane
         uses: ruby/setup-ruby@v1
@@ -47,10 +51,5 @@ jobs:
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
         run: |
-          if [ -d "ios" ]; then
-            cd ios
-            fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true
-          else
-            echo "Directory ios not found"
-            exit 1
-          fi
+          cd ios
+          fastlane pilot upload --api_key_path ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8 --skip_waiting_for_build_processing true
