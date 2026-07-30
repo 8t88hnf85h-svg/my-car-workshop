@@ -11,19 +11,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (For Web Project)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - name: Install Dependencies and Build Web App
+      - name: Install and Build Web App
         run: |
           if [ -f "package.json" ]; then
             npm install
             npm run build
-            echo "Web app built successfully!"
-          else
-            echo "No package.json found, skipping web build."
+            echo "Web build completed successfully!"
           fi
 
       - name: Setup App Store Connect API Key File
@@ -33,3 +31,11 @@ jobs:
           mkdir -p ~/.private_keys
           echo "$PRIVATE_KEY" > ~/.private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}.p8
           echo "API Key file created successfully!"
+
+      - name: Check Capacitor Project Configuration
+        run: |
+          if [ -d "ios" ]; then
+            echo "iOS folder found in the project!"
+          else
+            echo "Warning: iOS folder not found yet. Make sure Capacitor iOS is configured."
+          fi
