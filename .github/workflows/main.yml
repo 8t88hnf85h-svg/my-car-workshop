@@ -24,6 +24,15 @@ jobs:
       - name: Sync Capacitor iOS
         run: bun x cap sync ios || true
 
+      - name: Increment Build Number
+        run: |
+          if [ -d "ios/App" ]; then
+            cd ios/App
+            # تحديث رقم البناء تلقائياً بناءً على رقم الـ Run في جيت هاب
+            agvtool new-version -all ${{ github.run_number }}
+            cd ../..
+          fi
+
       - name: Set up Ruby & Fastlane
         uses: ruby/setup-ruby@v1
         with:
