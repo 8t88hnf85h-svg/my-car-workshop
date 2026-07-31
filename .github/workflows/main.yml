@@ -1,9 +1,7 @@
 name: iOS Release (App Store Connect)
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
